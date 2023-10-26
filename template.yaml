@@ -21,6 +21,12 @@ Parameters:
   GCPLocation:
     # GCP Location
     Type: String
+  TelegramBotToken:
+    # Telegram Bot Token for sending message
+    Type: String
+  TelegramChatId:
+    # Telegram chat ID for sending the summary
+    Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -53,6 +59,10 @@ Resources:
             Ref: GCPSecretName
           GCP_LOCATION:
             Ref: GCPLocation
+          TELEGRAM_BOT_TOKEN:
+            Ref: TelegramBotToken
+          TELEGRAM_CHAT_ID:
+            Ref: TelegramChatId
       MemorySize: 512
 
 Outputs:
