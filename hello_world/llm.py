@@ -9,6 +9,7 @@ PROMPT = """Here is the weekend travel information from Transport for London. \
 Please provide a summary containing the information about weekend travel \
 disruptions, and events that are happening this weekend."""
 
+
 def produce_summary(content: str) -> str:
     vertexai.init(project=PROJECT, location=LOCATION)
     parameters = {
@@ -19,9 +20,6 @@ def produce_summary(content: str) -> str:
         "top_k": 40,
     }
     model = TextGenerationModel.from_pretrained("text-bison")
-    response = model.predict(
-        PROMPT + "\n" + content,
-        **parameters
-    )
+    response = model.predict(PROMPT + "\n" + content, **parameters)
     # print(response.text)
     return response.text
