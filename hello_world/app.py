@@ -23,6 +23,7 @@ def load_gcp_credentials():
 
 def lambda_handler(event, context):
     load_gcp_credentials()
+    print("Loaded GCP Credentials successfully")
     s3 = boto3.resource("s3")
     message_id = event["Records"][0]["ses"]["mail"]["messageId"]
     email_object = s3.Object(
@@ -31,6 +32,7 @@ def lambda_handler(event, context):
     )
     resp = email_object.get()
     data = resp["Body"].read()
+    print(f"Loaded email message ID {message_id}")
     msg = email.message_from_bytes(data)
     texts = [
         part.get_payload()
@@ -38,7 +40,7 @@ def lambda_handler(event, context):
         if part.get_content_type() == "text/plain"
     ]
     summary = llm.produce_summary("\n".join(texts))
-    print(summary)
+    print(f"Got summary from LLM: {summary}")
 
     return {
         "statusCode": 200,
