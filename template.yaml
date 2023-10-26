@@ -34,10 +34,10 @@ Globals:
     Timeout: 30
 
 Resources:
-  HelloWorldFunction:
+  SummariseTflEmailFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: hello_world/
+      CodeUri: summarise_tfl_email/
       Handler: app.lambda_handler
       Runtime: python3.11
       Architectures:
@@ -65,10 +65,3 @@ Resources:
             Ref: TelegramChatId
       MemorySize: 512
 
-Outputs:
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
