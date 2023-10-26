@@ -1,44 +1,45 @@
+import email
 import json
+import os
 
-# import requests
+import boto3
+
+import llm
+
+S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
+SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
+REGION_NAME = "eu-west-1"
+
+
+def load_gcp_credentials():
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager", region_name=REGION_NAME)
+    get_secret_value_response = client.get_secret_value(SecretId=SECRET_NAME)
+    gcp_cred = get_secret_value_response["SecretString"]
+    with open("/tmp/credentials.json", "w") as f:
+        f.write(gcp_cred)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
 
 
 def lambda_handler(event, context):
-    """Sample pure Lambda function
-
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
-
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
+    load_gcp_credentials()
+    s3 = boto3.resource("s3")
+    message_id = event["Records"][0]["ses"]["mail"]["messageId"]
+    email_object = s3.Object(
+        bucket_name=S3_BUCKET_NAME,
+        key=message_id,
+    )
+    resp = email_object.get()
+    data = resp["Body"].read()
+    msg = email.message_from_bytes(data)
+    texts = [
+        part.get_payload()
+        for part in msg.walk()
+        if part.get_content_type() == "text/plain"
+    ]
+    summary = llm.produce_summary("\n".join(texts))
+    print(summary)
 
     return {
         "statusCode": 200,
-        "body": json.dumps(
-            {
-                "message": "hello world",
-                # "location": ip.text.replace("\n", "")
-            }
-        ),
     }

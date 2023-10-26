@@ -3,8 +3,8 @@ import os
 import vertexai
 from vertexai.language_models import TextGenerationModel
 
-PROJECT = os.environ.get("PROJECT")
-LOCATION = os.environ.get("LOCATION", "us-central1")
+PROJECT = os.environ.get("GCP_PROJECT")
+LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
 PROMPT = """Here is the weekend travel information from Transport for London. \
 Please provide a summary containing the information about weekend travel \
 disruptions, and events that are happening this weekend."""

@@ -5,10 +5,27 @@ Description: >
 
   Sample SAM Template for tfl-email
 
+Parameters:
+  S3BucketName:
+    # Bucket for storing emails from SES
+    Type: String
+  GCPSecretArn:
+    # ARN for secret manager for storing GCP Credentials
+    Type: String
+  GCPSecretName:
+    # Secret name for GCP Credentials
+    Type: String
+  GCPProjectName:
+    # GCP Project Name
+    Type: String
+  GCPLocation:
+    # GCP Location
+    Type: String
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 30
 
 Resources:
   HelloWorldFunction:
@@ -19,6 +36,24 @@ Resources:
       Runtime: python3.11
       Architectures:
         - x86_64
+      Policies:
+        - S3ReadPolicy:
+            BucketName:
+              Ref: S3BucketName
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn:
+              Ref: GCPSecretArn
+      Environment:
+        Variables:
+          S3_BUCKET_NAME:
+            Ref: S3BucketName
+          GCP_PROJECT:
+            Ref: GCPProjectName
+          GCP_SECRET_NAME:
+            Ref: GCPSecretName
+          GCP_LOCATION:
+            Ref: GCPLocation
+      MemorySize: 512
 
 Outputs:
   HelloWorldFunction:
