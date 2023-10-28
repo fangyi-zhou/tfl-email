@@ -9,12 +9,10 @@ Parameters:
   S3BucketName:
     # Bucket for storing emails from SES
     Type: String
-  GCPSecretArn:
-    # ARN for secret manager for storing GCP Credentials
-    Type: String
   GCPSecretName:
     # Secret name for GCP Credentials
     Type: String
+    Default: gcp-credentials
   GCPProjectName:
     # GCP Project Name
     Type: String
@@ -48,7 +46,7 @@ Resources:
               Ref: S3BucketName
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn:
-              Ref: GCPSecretArn
+              Ref: GcpCredentialsSecret
       Environment:
         Variables:
           S3_BUCKET_NAME:
@@ -64,4 +62,10 @@ Resources:
           TELEGRAM_CHAT_ID:
             Ref: TelegramChatId
       MemorySize: 512
+  GcpCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: "Credentials for GCP for LLM queries"
+      Name:
+        Ref: GCPSecretName
 
