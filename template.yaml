@@ -25,6 +25,10 @@ Parameters:
   TelegramChatId:
     # Telegram chat ID for sending the summary
     Type: String
+  SummaryTableName:
+    # Table name for storing summaries
+    Type: String
+    Default: tfl-emails-summary
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -33,7 +37,14 @@ Globals:
 
 Resources:
   SummariseTflEmailFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
+    Connectors:
+      TableConn:
+        Properties:
+          Destination:
+            Id: SummaryTable
+          Permissions:
+            - Write
     Properties:
       CodeUri: summarise_tfl_email/
       Handler: app.lambda_handler
@@ -61,7 +72,10 @@ Resources:
             Ref: TelegramBotToken
           TELEGRAM_CHAT_ID:
             Ref: TelegramChatId
+          SUMMARY_TABLE_NAME:
+            Ref: SummaryTableName
       MemorySize: 512
+
   GcpCredentialsSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -69,3 +83,21 @@ Resources:
       Name:
         Ref: GCPSecretName
 
+  SummaryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "week-id"
+          AttributeType: "S"
+          # format: 'YYYY-WW' where YYYY is the year and WW is week number
+      KeySchema:
+        -
+          AttributeName: "week-id"
+          KeyType: "HASH"
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: True
+      TableName:
+        Ref: SummaryTableName
+      BillingMode: "PAY_PER_REQUEST"

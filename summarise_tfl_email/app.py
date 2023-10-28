@@ -1,4 +1,6 @@
+import datetime
 import email
+import email.utils
 import json
 import os
 
@@ -10,11 +12,13 @@ import llm
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
 REGION_NAME = "eu-west-1"
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
-TELEGRAM_API_ENDPOINT = (
-    "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendMessage"
-)
+SUMMARY_TABLE_NAME = os.environ.get("SUMMARY_TABLE_NAME")
+
+# TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+# TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+# TELEGRAM_API_ENDPOINT = (
+#     "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendMessage"
+# )
 
 
 def load_gcp_credentials():
@@ -50,15 +54,28 @@ def lambda_handler(event, context):
     summary = llm.produce_summary("\n".join(texts))
     print(f"Got summary from LLM: {summary}")
 
-    r = requests.post(
-        TELEGRAM_API_ENDPOINT,
-        data={
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": summary,
-            "parse_mode": "Markdown",
-        },
-    )
-    print(f"Got response from Telegram {r.json()}")
+    email_date = email.utils.parsedate_to_datetime(msg.get("Date"))
+    week_number = email_date.strftime("%Y-%W")
+    print(f"Email is dated {email_date}, converting to {week_number}")
+    ttl = email_date + datetime.timedelta(days=15)
+    item = {
+        "week-id": {"S": week_number},
+        "summary": {"S": summary},
+        "ttl": {"N": str(int(ttl.timestamp()))},
+        "email-id": {"S": message_id},
+    }
+    dynamodb = boto3.client("dynamodb")
+    resp = dynamodb.put_item(TableName=SUMMARY_TABLE_NAME, Item=item)
+    print(f"Got response from DynamoDB: {resp}")
+    # r = requests.post(
+    #     TELEGRAM_API_ENDPOINT,
+    #     data={
+    #         "chat_id": TELEGRAM_CHAT_ID,
+    #         "text": summary,
+    #         "parse_mode": "Markdown",
+    #     },
+    # )
+    # print(f"Got response from Telegram {r.json()}")
 
     return {
         "statusCode": 200,
