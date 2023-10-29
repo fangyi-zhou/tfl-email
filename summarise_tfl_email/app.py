@@ -3,9 +3,11 @@ import email
 import email.utils
 import json
 import os
+import re
 
 import boto3
 import requests
+from bs4 import BeautifulSoup
 
 import llm
 
@@ -31,6 +33,12 @@ def load_gcp_credentials():
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
 
 
+def clean_html(raw_html: str) -> str:
+    soup = BeautifulSoup(raw_html, "html.parser")
+    text = soup.get_text(" ")
+    return re.sub("\s+", " ", text).strip()
+
+
 def lambda_handler(event, context):
     load_gcp_credentials()
     print("Loaded GCP Credentials successfully")
@@ -49,9 +57,10 @@ def lambda_handler(event, context):
     texts = [
         part.get_payload()
         for part in msg.walk()
-        if part.get_content_type() == "text/plain"
+        if part.get_content_type() == "text/html"
     ]
-    summary = llm.produce_summary("\n".join(texts))
+    content = clean_html("\n".join(texts))
+    summary = llm.produce_summary(content)
     print(f"Got summary from LLM: {summary}")
 
     email_date = email.utils.parsedate_to_datetime(msg.get("Date"))
