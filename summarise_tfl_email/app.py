@@ -54,6 +54,12 @@ def lambda_handler(event, context):
     print(f"Loaded email message ID {message_id}")
 
     msg = email.message_from_bytes(data)
+    if msg["Subject"] != "Weekend travel advice":
+        print(f'Skipping email with subject {msg["Subject"]}')
+        return {
+            "statusCode": 200,
+        }
+
     texts = [
         part.get_payload()
         for part in msg.walk()
