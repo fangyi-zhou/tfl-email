@@ -16,12 +16,6 @@ SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
 REGION_NAME = "eu-west-1"
 SUMMARY_TABLE_NAME = os.environ.get("SUMMARY_TABLE_NAME")
 
-# TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-# TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
-# TELEGRAM_API_ENDPOINT = (
-#     "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendMessage"
-# )
-
 
 def load_gcp_credentials():
     session = boto3.session.Session()
@@ -82,15 +76,6 @@ def lambda_handler(event, context):
     dynamodb = boto3.client("dynamodb")
     resp = dynamodb.put_item(TableName=SUMMARY_TABLE_NAME, Item=item)
     print(f"Got response from DynamoDB: {resp}")
-    # r = requests.post(
-    #     TELEGRAM_API_ENDPOINT,
-    #     data={
-    #         "chat_id": TELEGRAM_CHAT_ID,
-    #         "text": summary,
-    #         "parse_mode": "Markdown",
-    #     },
-    # )
-    # print(f"Got response from Telegram {r.json()}")
 
     return {
         "statusCode": 200,
