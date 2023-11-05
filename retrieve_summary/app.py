@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 import json
 import os
@@ -39,8 +38,6 @@ def load_telegram_credentials():
 
 
 def handle_telegram_webhook(event):
-    import telegram
-
     credentials = load_telegram_credentials()
     print("Loaded telegram credentials")
     if (
@@ -50,15 +47,26 @@ def handle_telegram_webhook(event):
         print("Ignoring possibly spoofed request")
         return {"statusCode": 403}
     body = json.loads(event["body"])
-    bot = telegram.Bot(token=credentials["bot_token"])
-    update = telegram.Update.de_json(body, bot)
     if (
-        update.message is not None
-        and update.message.text is not None
-        and update.message.text.startswith("/info")
+        body["message"] is not None
+        and body["message"]["text"] is not None
+        and body["message"]["text"].startswith("/info")
     ):
-        summary = load_summary()
-        asyncio.run(update.message.reply_text(summary[:4096]))
+        summary = load_summary()[:4096]
+        chat_id = body["message"]["chat"]["id"]
+        print(f"Replying to chat_id {chat_id}")
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps(
+                {
+                    "method": "sendMessage",
+                    "text": summary,
+                    "chat_id": chat_id,
+                    "parse_mode": "Markdown",
+                }
+            ),
+        }
     return {"statusCode": 200}
 
 
