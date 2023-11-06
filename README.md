@@ -11,7 +11,8 @@ email, and publish the summary as a Telegram bot.
 
 ## Getting started
 
-You can try the bot out at https://t.me/tfl_travel_information_bot
+You can try the bot out at https://t.me/tfl_travel_information_bot, the summary
+will be published in the channel https://t.me/weekend_travel_info_London.
 
 Send "/info" to retrieve the summary for this weekend (usually available after
 Thursday noon).

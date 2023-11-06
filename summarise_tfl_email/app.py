@@ -12,15 +12,25 @@ from bs4 import BeautifulSoup
 import llm
 
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
-SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
+GCP_SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
+TELEGRAM_SECRET_NAME = os.environ.get("TELEGRAM_SECRET_NAME")
 REGION_NAME = "eu-west-1"
 SUMMARY_TABLE_NAME = os.environ.get("SUMMARY_TABLE_NAME")
+TELEGRAM_API_ENDPOINT = "https://api.telegram.org/bot%s/sendMessage"
+
+
+def load_telegram_credentials():
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager", region_name=REGION_NAME)
+    get_secret_value_response = client.get_secret_value(SecretId=TELEGRAM_SECRET_NAME)
+    telegram_credentials = get_secret_value_response["SecretString"]
+    return json.loads(telegram_credentials)
 
 
 def load_gcp_credentials():
     session = boto3.session.Session()
     client = session.client(service_name="secretsmanager", region_name=REGION_NAME)
-    get_secret_value_response = client.get_secret_value(SecretId=SECRET_NAME)
+    get_secret_value_response = client.get_secret_value(SecretId=GCP_SECRET_NAME)
     gcp_cred = get_secret_value_response["SecretString"]
     with open("/tmp/credentials.json", "w") as f:
         f.write(gcp_cred)
@@ -76,6 +86,17 @@ def lambda_handler(event, context):
     dynamodb = boto3.client("dynamodb")
     resp = dynamodb.put_item(TableName=SUMMARY_TABLE_NAME, Item=item)
     print(f"Got response from DynamoDB: {resp}")
+
+    telegram_creds = load_telegram_credentials()
+    r = requests.post(
+        TELEGRAM_API_ENDPOINT % telegram_creds["bot_token"],
+        data={
+            "chat_id": telegram_creds["channel_id"],
+            "text": summary[:4096],
+            "parse_mode": "Markdown",
+        },
+    )
+    print(f"Got response from Telegram {r.json()}")
 
     return {
         "statusCode": 200,

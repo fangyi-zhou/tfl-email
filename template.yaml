@@ -56,6 +56,9 @@ Resources:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn:
               Ref: GcpCredentialsSecret
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn:
+              Ref: TelegramSecret
       Environment:
         Variables:
           S3_BUCKET_NAME:
@@ -68,6 +71,8 @@ Resources:
             Ref: GCPLocation
           SUMMARY_TABLE_NAME:
             Ref: SummaryTableName
+          TELEGRAM_SECRET_NAME:
+            Ref: TelegramSecretName
       MemorySize: 512
 
   RetrieveSummaryFunction:
