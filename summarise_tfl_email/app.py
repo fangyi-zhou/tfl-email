@@ -42,7 +42,7 @@ def load_gcp_credentials():
 def clean_html(raw_html: str) -> str:
     soup = BeautifulSoup(raw_html, "html.parser")
     text = soup.get_text(" ")
-    return re.sub("\s+", " ", text).strip()
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def lambda_handler(event, context):
