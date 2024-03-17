@@ -2,4 +2,5 @@ beautifulsoup4
 boto3
 google-cloud-aiplatform
 google-cloud-api-keys
+markdown
 requests

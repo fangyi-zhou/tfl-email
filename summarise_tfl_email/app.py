@@ -6,6 +6,7 @@ import os
 import re
 
 import boto3
+import markdown
 import requests
 from bs4 import BeautifulSoup
 
@@ -17,6 +18,7 @@ TELEGRAM_SECRET_NAME = os.environ.get("TELEGRAM_SECRET_NAME")
 REGION_NAME = "eu-west-1"
 SUMMARY_TABLE_NAME = os.environ.get("SUMMARY_TABLE_NAME")
 TELEGRAM_API_ENDPOINT = "https://api.telegram.org/bot%s/sendMessage"
+REMOVE_P = re.compile(r"<\/?p>")
 
 
 def load_telegram_credentials():
@@ -87,13 +89,16 @@ def lambda_handler(event, context):
     resp = dynamodb.put_item(TableName=SUMMARY_TABLE_NAME, Item=item)
     print(f"Got response from DynamoDB: {resp}")
 
+    summary_html = markdown.markdown(summary)
+    # Remove <p> and </p> since telegram does not support them
+    summary_html = REMOVE_P.sub("", summary_html)
     telegram_creds = load_telegram_credentials()
     r = requests.post(
         TELEGRAM_API_ENDPOINT % telegram_creds["bot_token"],
         data={
             "chat_id": telegram_creds["channel_id"],
-            "text": summary[:4096],
-            "parse_mode": "Markdown",
+            "text": summary_html[:4096],
+            "parse_mode": "html",
         },
     )
     r_json = r.json()
