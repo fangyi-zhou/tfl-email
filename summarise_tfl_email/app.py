@@ -96,8 +96,9 @@ def lambda_handler(event, context):
             "parse_mode": "Markdown",
         },
     )
-    print(f"Got response from Telegram {r.json()}")
+    r_json = r.json()
+    print(f"Got response from Telegram {r_json}")
 
     return {
-        "statusCode": 200,
+        "statusCode": 200 if r_json["ok"] else 500,
     }
