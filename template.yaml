@@ -46,7 +46,7 @@ Resources:
     Properties:
       CodeUri: summarise_tfl_email/
       Handler: app.lambda_handler
-      Runtime: python3.11
+      Runtime: python3.12
       Architectures:
         - x86_64
       Policies:
@@ -87,7 +87,7 @@ Resources:
     Properties:
       CodeUri: retrieve_summary/
       Handler: app.lambda_handler
-      Runtime: python3.11
+      Runtime: python3.12
       Architectures:
         - x86_64
       Environment:
