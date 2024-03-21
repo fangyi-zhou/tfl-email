@@ -92,6 +92,7 @@ def lambda_handler(event, context):
     summary_html = markdown.markdown(summary)
     # Remove <p> and </p> since telegram does not support them
     summary_html = REMOVE_P.sub("", summary_html)
+    print(f"Sending summary in HTML:\n{summary_html}")
     telegram_creds = load_telegram_credentials()
     r = requests.post(
         TELEGRAM_API_ENDPOINT % telegram_creds["bot_token"],
@@ -103,7 +104,7 @@ def lambda_handler(event, context):
     )
     r_json = r.json()
     print(f"Got response from Telegram {r_json}")
+    if not r_json["ok"]:
+        raise RuntimeError("Failed to post summary to Telegram")
 
-    return {
-        "statusCode": 200 if r_json["ok"] else 500,
-    }
+    return {"statusCode": 200}
