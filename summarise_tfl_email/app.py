@@ -18,7 +18,7 @@ TELEGRAM_SECRET_NAME = os.environ.get("TELEGRAM_SECRET_NAME")
 REGION_NAME = "eu-west-1"
 SUMMARY_TABLE_NAME = os.environ.get("SUMMARY_TABLE_NAME")
 TELEGRAM_API_ENDPOINT = "https://api.telegram.org/bot%s/sendMessage"
-REMOVE_P = re.compile(r"<\/?p>")
+REMOVE_UNSUPPORTED_HTML = re.compile(r"<\/?(?!(b|strong|i|em))[a-z]*>")
 
 
 def load_telegram_credentials():
@@ -90,8 +90,8 @@ def lambda_handler(event, context):
     print(f"Got response from DynamoDB: {resp}")
 
     summary_html = markdown.markdown(summary)
-    # Remove <p> and </p> since telegram does not support them
-    summary_html = REMOVE_P.sub("", summary_html)
+    # Remove unsupported HTML tags by Telegram
+    summary_html = REMOVE_UNSUPPORTED_HTML.sub("", summary_html)
     print(f"Sending summary in HTML:\n{summary_html}")
     telegram_creds = load_telegram_credentials()
     r = requests.post(
