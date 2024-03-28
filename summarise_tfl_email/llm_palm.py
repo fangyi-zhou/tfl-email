@@ -9,7 +9,7 @@ PROMPT = """
 Given a summary of disruptions and events happening this weekend using the \
 provided weekend travel information.
 For disruptions, include station names, line names, and dates.
-Remember to include disruptions of all modes of transport: Tube, London
+Remember to include disruptions of all modes of transport: Tube, London \
 Overground, DLR, Elizabeth Line, Trams and Trains.
 For events, remove sentences about increased traffic or large crowds.
 
@@ -39,6 +39,7 @@ def produce_summary(content: str) -> str:
     model = TextGenerationModel.from_pretrained("text-bison")
     text_input = PROMPT % content
     print(text_input)
+    print("Invoking LLM...")
     response = model.predict(PROMPT % content, **parameters)
     # print(response.text)
     return response.text

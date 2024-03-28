@@ -31,7 +31,7 @@ Parameters:
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 30
+    Timeout: 120
 
 Resources:
   SummariseTflEmailFunction:
@@ -59,6 +59,12 @@ Resources:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn:
               Ref: TelegramSecret
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource:
+                - "arn:aws:bedrock:*::foundation-model/meta.llama2-70b-chat-v1"
       Environment:
         Variables:
           S3_BUCKET_NAME:

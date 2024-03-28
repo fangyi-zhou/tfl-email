@@ -10,7 +10,8 @@ import markdown
 import requests
 from bs4 import BeautifulSoup
 
-import llm
+# import llm_palm as llm
+import llm_llama as llm
 
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 GCP_SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
