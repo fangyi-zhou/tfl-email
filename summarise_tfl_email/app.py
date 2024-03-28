@@ -59,6 +59,8 @@ def lambda_handler(event, context):
     data = resp["Body"].read()
     print(f"Loaded email message ID {message_id}")
 
+    is_dry_run = event.get("dry_run", False)
+
     msg = email.message_from_bytes(data)
     if msg["Subject"] != "Weekend travel advice":
         print(f'Skipping email with subject {msg["Subject"]}')
@@ -74,6 +76,11 @@ def lambda_handler(event, context):
     content = clean_html("\n".join(texts))
     summary = llm.produce_summary(content)
     print(f"Got summary from LLM: {summary}")
+
+    if is_dry_run:
+        # Finish processing here if dry run
+        # Without storing the summary or publishing to Telegram
+        return
 
     email_date = email.utils.parsedate_to_datetime(msg.get("Date"))
     week_number = email_date.strftime("%Y-%W")
