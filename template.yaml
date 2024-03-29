@@ -9,16 +9,6 @@ Parameters:
   S3BucketName:
     # Bucket for storing emails from SES
     Type: String
-  GCPSecretName:
-    # Secret name for GCP Credentials
-    Type: String
-    Default: gcp-credentials
-  GCPProjectName:
-    # GCP Project Name
-    Type: String
-  GCPLocation:
-    # GCP Location
-    Type: String
   SummaryTableName:
     # Table name for storing summaries
     Type: String
@@ -55,9 +45,6 @@ Resources:
               Ref: S3BucketName
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn:
-              Ref: GcpCredentialsSecret
-        - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn:
               Ref: TelegramSecret
         - Statement:
             - Effect: Allow
@@ -69,17 +56,11 @@ Resources:
         Variables:
           S3_BUCKET_NAME:
             Ref: S3BucketName
-          GCP_PROJECT:
-            Ref: GCPProjectName
-          GCP_SECRET_NAME:
-            Ref: GCPSecretName
-          GCP_LOCATION:
-            Ref: GCPLocation
           SUMMARY_TABLE_NAME:
             Ref: SummaryTableName
           TELEGRAM_SECRET_NAME:
             Ref: TelegramSecretName
-      MemorySize: 512
+      MemorySize: 128
 
   RetrieveSummaryFunction:
     Type: AWS::Serverless::Function
@@ -110,13 +91,6 @@ Resources:
       Events:
         ApiEvent:
           Type: HttpApi
-
-  GcpCredentialsSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: "Credentials for GCP for LLM queries"
-      Name:
-        Ref: GCPSecretName
 
   TelegramSecret:
     Type: AWS::SecretsManager::Secret

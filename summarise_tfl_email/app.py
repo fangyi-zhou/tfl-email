@@ -14,7 +14,6 @@ from bs4 import BeautifulSoup
 import llm_llama as llm
 
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
-GCP_SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
 TELEGRAM_SECRET_NAME = os.environ.get("TELEGRAM_SECRET_NAME")
 REGION_NAME = "eu-west-1"
 SUMMARY_TABLE_NAME = os.environ.get("SUMMARY_TABLE_NAME")
@@ -30,16 +29,6 @@ def load_telegram_credentials():
     return json.loads(telegram_credentials)
 
 
-def load_gcp_credentials():
-    session = boto3.session.Session()
-    client = session.client(service_name="secretsmanager", region_name=REGION_NAME)
-    get_secret_value_response = client.get_secret_value(SecretId=GCP_SECRET_NAME)
-    gcp_cred = get_secret_value_response["SecretString"]
-    with open("/tmp/credentials.json", "w") as f:
-        f.write(gcp_cred)
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
-
-
 def clean_html(raw_html: str) -> str:
     soup = BeautifulSoup(raw_html, "html.parser")
     text = soup.get_text(" ")
@@ -47,9 +36,6 @@ def clean_html(raw_html: str) -> str:
 
 
 def lambda_handler(event, context):
-    load_gcp_credentials()
-    print("Loaded GCP Credentials successfully")
-
     s3 = boto3.resource("s3")
     message_id = event["Records"][0]["ses"]["mail"]["messageId"]
     email_object = s3.Object(

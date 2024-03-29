@@ -1,10 +1,12 @@
 import os
 
+import boto3
 import vertexai
 from vertexai.language_models import TextGenerationModel
 
-PROJECT = os.environ.get("GCP_PROJECT")
+GCP_SECRET_NAME = os.environ.get("GCP_SECRET_NAME")
 LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
+PROJECT = os.environ.get("GCP_PROJECT")
 PROMPT = """
 Given a summary of disruptions and events happening this weekend using the \
 provided weekend travel information.
@@ -27,7 +29,20 @@ Events:
 """
 
 
+def load_gcp_credentials():
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager")
+    get_secret_value_response = client.get_secret_value(SecretId=GCP_SECRET_NAME)
+    gcp_cred = get_secret_value_response["SecretString"]
+    with open("/tmp/credentials.json", "w") as f:
+        f.write(gcp_cred)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
+
+
 def produce_summary(content: str) -> str:
+    load_gcp_credentials()
+    print("Loaded GCP Credentials successfully")
+
     vertexai.init(project=PROJECT, location=LOCATION)
     parameters = {
         "candidate_count": 1,
