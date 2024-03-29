@@ -1,5 +1,6 @@
 import json
 
+from botocore.client import Config
 import boto3
 
 PROMPT = """
@@ -19,7 +20,16 @@ LLAMA2_70B = "meta.llama2-70b-chat-v1"
 
 def produce_summary(content: str) -> str:
     # eu-west-1 currently doesn't have Bedrock
-    client = boto3.client("bedrock-runtime", region_name="us-east-1")
+    # Increase read timeout from 60 since LLM might take some time
+    config = Config(
+        read_timeout=180,
+        region_name="us-east-1",
+        retries={
+            "mode": "standard",
+            "max_attempts": 1,
+        },
+    )
+    client = boto3.client("bedrock-runtime", config=config)
     text_input = PROMPT % content
     print(text_input)
     print("Invoking LLM...")
