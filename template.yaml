@@ -51,7 +51,7 @@ Resources:
               Action:
                 - bedrock:InvokeModel
               Resource:
-                - "arn:aws:bedrock:*::foundation-model/meta.llama2-70b-chat-v1"
+                - "arn:aws:bedrock:*::foundation-model/meta.llama3-1-70b-instruct-v1:0"
       Environment:
         Variables:
           S3_BUCKET_NAME:
