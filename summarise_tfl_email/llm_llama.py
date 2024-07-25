@@ -15,8 +15,7 @@ For events, remove sentences about increased traffic or large crowds.
 
 Weekend travel information: %s
 
-Disruptions: [/INST]
-"""
+Disruptions: [/INST]"""
 LLAMA2_70B = "meta.llama2-70b-chat-v1"
 LLAMA31_70B = "meta.llama3-1-70b-instruct-v1:0"
 
@@ -52,4 +51,7 @@ def produce_summary(content: str) -> str:
     response_body = json.loads(response.get("body").read())
     response_text = response_body["generation"]
     # print(response_text)
+
+    # Remove unexpected tags
+    response_text = response_text.replace("[/INST]", "")
     return "Disruptions:\n" + response_text
