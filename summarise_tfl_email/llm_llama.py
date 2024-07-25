@@ -28,7 +28,7 @@ def produce_summary(content: str) -> str:
         region_name="us-west-2",
         retries={
             "mode": "standard",
-            "max_attempts": 1,
+            "max_attempts": 2,
         },
     )
     client = boto3.client("bedrock-runtime", config=config)
