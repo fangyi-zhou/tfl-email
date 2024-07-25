@@ -3,19 +3,18 @@ import json
 from botocore.client import Config
 import boto3
 
-PROMPT = """
-<s>[INST] <<SYS>>
+PROMPT = """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 Given a summary of disruptions and events happening this weekend using the \
 provided weekend travel information.
 For disruptions, include station names, line names, and dates.
 Remember to include disruptions of all modes of transport: Tube, London \
 Overground, DLR, Elizabeth Line, Trams and Trains.
-For events, remove sentences about increased traffic or large crowds.
-<</SYS>>
-
-Weekend travel information: %s
-
-Disruptions: [/INST]"""
+For events, remove sentences about increased traffic or large crowds.<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Weekend travel information: %s<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
+Disruptions:
+"""
 LLAMA2_70B = "meta.llama2-70b-chat-v1"
 LLAMA31_70B = "meta.llama3-1-70b-instruct-v1:0"
 
@@ -28,7 +27,7 @@ def produce_summary(content: str) -> str:
         region_name="us-west-2",
         retries={
             "mode": "standard",
-            "max_attempts": 2,
+            "max_attempts": 5,
         },
     )
     client = boto3.client("bedrock-runtime", config=config)
@@ -51,7 +50,4 @@ def produce_summary(content: str) -> str:
     response_body = json.loads(response.get("body").read())
     response_text = response_body["generation"]
     # print(response_text)
-
-    # Remove unexpected tags
-    response_text = response_text.replace("[/INST]", "")
     return "Disruptions:\n" + response_text
