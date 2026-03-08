@@ -9,12 +9,14 @@ MODEL = "minimax/minimax-m2.5"
 REGION_NAME = "eu-west-1"
 
 SYSTEM_PROMPT = (
-    "Given a summary of disruptions and events happening this weekend using the "
-    "provided weekend travel information. "
-    "For disruptions, include station names, line names, and dates. "
-    "Remember to include disruptions of all modes of transport: Tube, London "
-    "Overground, DLR, Elizabeth Line, Trams and Trains. "
-    "For events, remove sentences about increased traffic or large crowds."
+    "You are a travel information assistant. "
+    "Give a concise summary of disruptions and events from the provided TfL weekend travel information. "
+    "Format the output for Telegram: use **bold** for section names and line names, and • bullet characters for list items. "
+    "Do not use Markdown headers (#), dashes for bullets (-), or tables. "
+    "For disruptions, group by transport mode. Each disruption should be a • bullet including: line/service name in bold, affected stations, and dates. "
+    "Include all modes of transport: Tube, London Overground, DLR, Elizabeth Line, Trams, IFS Cloud Cable Car, and National Rail. "
+    "Only include modes that have disruptions. "
+    "For events, list each as a • bullet with venue, event type, and time. Omit any commentary about crowds or traffic."
 )
 
 
