@@ -1,0 +1,38 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+TfL Weekend Travel Email Summariser — an AWS SAM application that receives TfL's "Weekend travel advice" emails via SES, summarises them using an LLM (Meta Llama 3.1 70B via AWS Bedrock), stores summaries in DynamoDB, and publishes them to a Telegram channel/bot.
+
+## Architecture
+
+Two AWS Lambda functions defined in `template.yaml`:
+
+- **`summarise_tfl_email/`** — Triggered by SES when an email arrives. Reads the email from S3, extracts HTML body, sends to LLM for summarisation, stores result in DynamoDB (`week-id` key format: `YYYY-WW`), and posts to Telegram channel. Supports `dry_run` mode in the event payload to skip storage/publishing.
+- **`retrieve_summary/`** — HTTP API (via API Gateway). Serves summaries from DynamoDB. Also handles Telegram webhook at `/telegram-webhook` (responds to `/info` command).
+
+LLM backends in `summarise_tfl_email/`:
+- `llm_llama.py` — Active. Uses AWS Bedrock with Llama 3.1 70B (`us-west-2` region). Uses Llama 3.1 prompt format with `<|begin_of_text|>` tags.
+- `llm_palm.py` — Legacy/unused. Google Vertex AI PaLM integration.
+
+External services: AWS S3, DynamoDB, Secrets Manager, Bedrock; Telegram Bot API.
+
+## Commands
+
+```bash
+sam build              # Build Lambda functions
+sam deploy             # Deploy to AWS (uses samconfig.toml defaults)
+sam validate           # Validate template
+sam local invoke SummariseTflEmailFunction -e event.json  # Test locally
+```
+
+## Key Details
+
+- Python 3.12 runtime, x86_64 architecture
+- Region: `eu-west-1` for main stack, `us-west-2` for Bedrock (Llama 3.1 availability)
+- DynamoDB table uses `week-id` (string, `YYYY-WW` format) as partition key with TTL on `ttl` attribute
+- Telegram messages are truncated to 4096 chars (Telegram API limit)
+- Summaries are converted from Markdown to HTML for Telegram, with unsupported HTML tags stripped
+- Telegram credentials (bot token, channel ID, webhook validation token) stored in AWS Secrets Manager
