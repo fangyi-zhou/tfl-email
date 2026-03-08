@@ -9,6 +9,7 @@ stack_name = "tfl-email"
 [default.build.parameters]
 cached = true
 parallel = true
+beta_features = true
 
 [default.validate.parameters]
 lint = true

@@ -26,6 +26,8 @@ Globals:
 Resources:
   SummariseTflEmailFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: python-uv
     Connectors:
       TableConn:
         Properties:
@@ -64,6 +66,8 @@ Resources:
 
   RetrieveSummaryFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: python-uv
     Connectors:
       TableConn:
         Properties:

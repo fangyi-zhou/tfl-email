@@ -22,11 +22,14 @@ External services: AWS S3, DynamoDB, Secrets Manager, Bedrock; Telegram Bot API.
 ## Commands
 
 ```bash
-sam build              # Build Lambda functions
+SAM_CLI_BETA_UV_PACKAGE_MANAGER=1 sam build   # Build Lambda functions (uv, experimental)
 sam deploy             # Deploy to AWS (uses samconfig.toml defaults)
 sam validate           # Validate template
 sam local invoke SummariseTflEmailFunction -e event.json  # Test locally
 ```
+
+Dependencies are managed with uv (`pyproject.toml` + `uv.lock` in each function directory).
+To add/update dependencies: edit `pyproject.toml` and run `uv lock` in the function directory.
 
 ## Key Details
 
