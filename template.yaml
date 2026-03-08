@@ -17,6 +17,10 @@ Parameters:
     # Secret name for Telegram bot tokens and webhook secrets
     Type: String
     Default: telegram-bot
+  OpenRouterSecretName:
+    # Secret name for OpenRouter API key
+    Type: String
+    Default: openrouter-api-key
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -48,12 +52,9 @@ Resources:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn:
               Ref: TelegramSecret
-        - Statement:
-            - Effect: Allow
-              Action:
-                - bedrock:InvokeModel
-              Resource:
-                - "arn:aws:bedrock:*::foundation-model/meta.llama3-1-70b-instruct-v1:0"
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn:
+              Ref: OpenRouterSecret
       Environment:
         Variables:
           S3_BUCKET_NAME:
@@ -62,6 +63,8 @@ Resources:
             Ref: SummaryTableName
           TELEGRAM_SECRET_NAME:
             Ref: TelegramSecretName
+          OPENROUTER_SECRET_NAME:
+            Ref: OpenRouterSecretName
       MemorySize: 128
 
   RetrieveSummaryFunction:
@@ -102,6 +105,13 @@ Resources:
       Description: "Telegram bot tokens and webhook secret token"
       Name:
         Ref: TelegramSecretName
+
+  OpenRouterSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: "OpenRouter API key for LLM summarisation"
+      Name:
+        Ref: OpenRouterSecretName
 
   SummaryTable:
     Type: AWS::DynamoDB::Table

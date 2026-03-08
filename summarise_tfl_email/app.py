@@ -11,7 +11,8 @@ import requests
 from bs4 import BeautifulSoup
 
 # import llm_palm as llm
-import llm_llama as llm
+# import llm_llama as llm
+import llm_openrouter as llm
 
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 TELEGRAM_SECRET_NAME = os.environ.get("TELEGRAM_SECRET_NAME")
