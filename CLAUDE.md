@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TfL Weekend Travel Email Summariser — an AWS SAM application that receives TfL's "Weekend travel advice" emails via SES, summarises them using an LLM (Meta Llama 3.1 70B via AWS Bedrock), stores summaries in DynamoDB, and publishes them to a Telegram channel/bot.
+TfL Weekend Travel Email Summariser — an AWS SAM application that receives TfL's weekend travel advice emails via SES, summarises them using an LLM (Meta Llama 3.1 70B via AWS Bedrock), stores summaries in DynamoDB, and publishes them to a Telegram channel/bot.
 
 ## Architecture
 
 Two AWS Lambda functions defined in `template.yaml`:
 
-- **`summarise_tfl_email/`** — Triggered by SES when an email arrives. Reads the email from S3, extracts HTML body, sends to LLM for summarisation, stores result in DynamoDB (`week-id` key format: `YYYY-WW`), and posts to Telegram channel. Supports `dry_run` mode in the event payload to skip storage/publishing.
+- **`summarise_tfl_email/`** — Triggered by SES when an email arrives. Reads the email from S3, extracts HTML body, sends to LLM for summarisation, stores result in DynamoDB (`week-id` key format: `YYYY-WW`), and posts to Telegram channel. Supports `dry_run` mode in the event payload to skip storage/publishing. Filters emails by subject using a case-insensitive substring match on `"weekend travel advice"`.
 - **`retrieve_summary/`** — HTTP API (via API Gateway). Serves summaries from DynamoDB. Also handles Telegram webhook at `/telegram-webhook` (responds to `/info` command).
 
 LLM backends in `summarise_tfl_email/`:
@@ -26,6 +26,10 @@ SAM_CLI_BETA_UV_PACKAGE_MANAGER=1 sam build   # Build Lambda functions (uv, expe
 sam deploy             # Deploy to AWS (uses samconfig.toml defaults)
 sam validate           # Validate template
 sam local invoke SummariseTflEmailFunction -e event.json  # Test locally
+
+# Dry-run the deployed Lambda against the most recent S3 email (no storage/publishing)
+uv run --with boto3 python3 dry_run.py
+uv run --with boto3 python3 dry_run.py <message-id>  # specify a particular email
 ```
 
 Dependencies are managed with uv (`pyproject.toml` + `uv.lock` in each function directory).
