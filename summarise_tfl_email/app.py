@@ -49,7 +49,7 @@ def lambda_handler(event, context):
     is_dry_run = event.get("dry_run", False)
 
     msg = email.message_from_bytes(data)
-    if msg["Subject"] != "Weekend travel advice":
+    if "weekend travel advice" not in msg["Subject"].lower():
         print(f'Skipping email with subject {msg["Subject"]}')
         return {
             "statusCode": 200,
