@@ -5,7 +5,7 @@ import boto3
 import requests
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL = "minimax/minimax-m2.5"
+MODEL = "moonshotai/kimi-k2.6"
 REGION_NAME = "eu-west-1"
 
 SYSTEM_PROMPT = (

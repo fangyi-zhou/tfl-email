@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TfL Weekend Travel Email Summariser — an AWS SAM application that receives TfL's weekend travel advice emails via SES, summarises them using an LLM (minimax/minimax-m2.5 via OpenRouter), stores summaries in DynamoDB, and publishes them to a Telegram channel/bot.
+TfL Weekend Travel Email Summariser — an AWS SAM application that receives TfL's weekend travel advice emails via SES, summarises them using an LLM (moonshotai/kimi-k2.6 via OpenRouter), stores summaries in DynamoDB, and publishes them to a Telegram channel/bot.
 
 ## Architecture
 
@@ -14,7 +14,7 @@ Two AWS Lambda functions defined in `template.yaml`:
 - **`retrieve_summary/`** — HTTP API (via API Gateway). Serves summaries from DynamoDB. Also handles Telegram webhook at `/telegram-webhook` (responds to `/info` command).
 
 LLM backends in `summarise_tfl_email/`:
-- `llm_openrouter.py` — Active. Uses OpenRouter API with `minimax/minimax-m2.5` model. API key stored in Secrets Manager (`openrouter-api-key`).
+- `llm_openrouter.py` — Active. Uses OpenRouter API with `moonshotai/kimi-k2.6` model. API key stored in Secrets Manager (`openrouter-api-key`).
 - `llm_llama.py` — Legacy/unused. AWS Bedrock with Llama 3.1 70B (`us-west-2` region).
 - `llm_palm.py` — Legacy/unused. Google Vertex AI PaLM integration.
 
